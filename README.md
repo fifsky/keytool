@@ -8,6 +8,10 @@
 
 ## Usage
 
+```text
+go install github.com/fifsky/ktool
+```
+
 Get certificate serial number
 ```bash
 ktool serial -f=./testdata/cert.pem
