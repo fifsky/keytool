@@ -1,5 +1,7 @@
 # RSA Key Tools
 
+[![Go](https://github.com/fifsky/ktool/actions/workflows/go.yml/badge.svg)](https://github.com/fifsky/ktool/actions/workflows/go.yml)
+
 ## Tools
  - format rsa key
  - pkcs1 to pkcs8
