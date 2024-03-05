@@ -43,3 +43,9 @@ Convert public key to pkcs8
 ```bash
 ktool convert -f=./testdata/pkcs1.pem -t=pkcs8
 ```
+
+Show private key format:
+```bash
+ktool info -f=./testdata/pkcs1.pem
+// Output: file ./testdata/pkcs1.pem format is: PKCS1
+```

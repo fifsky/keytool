@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 || !slices.Contains([]string{"format", "serial", "convert"}, os.Args[1]) {
+	if len(os.Args) < 2 || !slices.Contains([]string{"format", "serial", "convert", "info"}, os.Args[1]) {
 		fmt.Println("Usage: ktool <tool> [options]")
 		fmt.Println("Tools: format, serial, convert")
 		os.Exit(1)
@@ -106,6 +106,28 @@ func main() {
 			}
 			fmt.Println(string(ret))
 		}
+	case "info":
+		if file == "" {
+			fmt.Println("Usage: ktool info -f=private.pem")
+			os.Exit(1)
+		}
+
+		content, err := os.ReadFile(file)
+		if err != nil {
+			fmt.Printf("read file err: %s\n", err.Error())
+			os.Exit(1)
+		}
+		_, err = PKCS82PKCS1(content)
+		if err != nil {
+			_, err := PKCS12PKCS8(content)
+			if err != nil {
+				fmt.Printf("parse err: %s\n", err.Error())
+				os.Exit(1)
+			}
+			fmt.Printf("file %s format is: PKCS1\n", file)
+			return
+		}
+		fmt.Printf("file %s format is: PKCS8\n", file)
 	}
 
 }
