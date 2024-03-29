@@ -70,12 +70,10 @@ openssl rsa -pubin -outform DER -in public_key.pem | base64
 
 rsa der public key to pem
 ```bash
-cat public_key | base64 --decode > public_key.der
-openssl rsa -pubin -inform DER -in public_key.der -outform PEM -out public_key.pem
+cat public_key | base64 --decode | openssl rsa -pubin -inform DER -outform PEM -out public_key.pem
 ```
 
 rsa der private key to pem
 ```bash
-cat pkcs8_private_key | base64 --decode pkcs8.der
-openssl rsa -inform DER -in pkcs8.der -outform PEM -out pkcs8.pem
+cat pkcs8_private_key | base64 --decode | openssl rsa -inform DER -outform PEM -out pkcs8.pem
 ```
