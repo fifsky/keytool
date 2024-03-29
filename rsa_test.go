@@ -118,3 +118,38 @@ func Test_isPublicKey(t *testing.T) {
 		}
 	})
 }
+
+func Test_getPublicKeyFormat(t *testing.T) {
+	t.Run("pkcs8", func(t *testing.T) {
+		publicKey, err := os.ReadFile("testdata/public_key.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if getPublicKeyFormat(publicKey) != PKCS8 {
+			t.Fatal("public is not pkcs8")
+		}
+	})
+
+	t.Run("pkcs1", func(t *testing.T) {
+		publicKey, err := os.ReadFile("testdata/public_key_pkcs1.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if getPublicKeyFormat(publicKey) != PKCS1 {
+			t.Fatal("public is not pkcs1")
+		}
+	})
+
+	t.Run("pkcs8 der", func(t *testing.T) {
+		publicKey, err := os.ReadFile("testdata/no_format_public_key.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if getPublicKeyFormat(publicKey) != PKCS8 {
+			t.Fatal("public is not pkcs8")
+		}
+	})
+}
