@@ -68,15 +68,14 @@ public pem to der
 openssl rsa -pubin -outform DER -in public_key.pem | base64
 ```
 
-public der to pem
+rsa der public key to pem
 ```bash
-cat no_format_public_key.txt| base64 --decode public_key.der
+cat public_key | base64 --decode > public_key.der
 openssl rsa -pubin -inform DER -in public_key.der -outform PEM -out public_key.pem
 ```
 
-private der to pem
+rsa der private key to pem
 ```bash
-cat no_format_pkcs8.txt | base64 --decode pkcs8.der
+cat pkcs8_private_key | base64 --decode pkcs8.der
 openssl rsa -inform DER -in pkcs8.der -outform PEM -out pkcs8.pem
 ```
-
