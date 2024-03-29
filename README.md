@@ -21,12 +21,12 @@ ktool serial -f=./testdata/cert.pem
 
 Format pkcs8 private key
 ```bash
-ktool format -f=./testdata/no_format_pkcs8.txt -m=private -t=pkcs8
+ktool format -f=./testdata/no_format_pkcs8.txt
 ```
 
 Format pkcs1 private key
 ```bash
-ktool format -f=./testdata/no_format_pkcs1.txt -m=private -t=pkcs1
+ktool format -f=./testdata/no_format_pkcs1.txt
 ```
 
 Format public key

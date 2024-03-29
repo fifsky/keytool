@@ -16,8 +16,6 @@ func main() {
 	}
 
 	var file string
-	var format string
-	var mode string
 	var to string
 
 	fg := flag.NewFlagSet("ktool", flag.ExitOnError)
@@ -25,9 +23,6 @@ func main() {
 
 	tool := os.Args[1]
 	switch tool {
-	case "format":
-		fg.StringVar(&format, "t", "", "format of the key, example: ktool format -t=pkcs1 -f=ccc.pem")
-		fg.StringVar(&mode, "m", "", "format mode, example: ktool -t=pkcs1 -f=ccc.pem -m=public,private")
 	case "convert":
 		fg.StringVar(&to, "t", "", "convert to pkcs1 or pkcs8, example: ktool convert -t=pkcs1 -f=private.pem")
 	}
@@ -40,8 +35,8 @@ func main() {
 
 	switch tool {
 	case "format":
-		if format == "" || file == "" || mode == "" {
-			fmt.Println("Usage: ktool format -t=pkcs1 -m=public -f=ccc.pem")
+		if file == "" {
+			fmt.Println("Usage: ktool format -m=public -f=ccc.pem")
 			os.Exit(1)
 		}
 
@@ -51,13 +46,11 @@ func main() {
 			os.Exit(1)
 		}
 
-		format = strings.ToUpper(format)
-		mode = strings.ToLower(mode)
-
-		if mode == "public" {
-			fmt.Println(string(FormatPublicKey(keyFormat(format), content)))
-		} else if mode == "private" {
-			fmt.Println(string(FormatPrivateKey(keyFormat(format), content)))
+		if isPublicKey(content) {
+			fmt.Println(string(FormatPublicKey(PKCS1, content)))
+		} else {
+			format := getPrivateKeyFormat(content)
+			fmt.Println(string(FormatPrivateKey(format, content)))
 		}
 
 	case "serial":
@@ -117,17 +110,8 @@ func main() {
 			fmt.Printf("read file err: %s\n", err.Error())
 			os.Exit(1)
 		}
-		_, err = PKCS82PKCS1(content)
-		if err != nil {
-			_, err := PKCS12PKCS8(content)
-			if err != nil {
-				fmt.Printf("parse err: %s\n", err.Error())
-				os.Exit(1)
-			}
-			fmt.Printf("file %s format is: PKCS1\n", file)
-			return
-		}
-		fmt.Printf("file %s format is: PKCS8\n", file)
+		ret := getPrivateKeyFormat(content)
+		fmt.Printf("file %s format is: %s\n", file, ret)
 	}
 
 }

@@ -101,8 +101,61 @@ func stringSplit(s string, n int) string {
 	return str
 }
 
+func getPrivateKeyFormat(key []byte) keyFormat {
+	if isPKCS1(key) {
+		return PKCS1
+	}
+	if isPKCS8(key) {
+		return PKCS8
+	}
+	return "unknown"
+}
+
+func isPublicKey(key []byte) bool {
+	block, _ := pem.Decode(key)
+	if block == nil {
+		return false
+	}
+
+	_, err := x509.ParsePKCS1PublicKey(block.Bytes)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func isPKCS1(pkcs1Key []byte) bool {
+	block, _ := pem.Decode(pkcs1Key)
+	if block == nil {
+		return false
+	}
+
+	_, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func isPKCS8(pkcs8Key []byte) bool {
+	block, _ := pem.Decode(pkcs8Key)
+	if block == nil {
+		return false
+	}
+
+	_, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 // FormatPublicKey formats public key, adds header, tail and newline character.
 func FormatPublicKey(pkcs keyFormat, publicKey []byte) []byte {
+	if bytes.HasPrefix(publicKey, []byte("-----BEGIN")) {
+		return publicKey
+	}
+
 	keyHeader, keyTail := "", ""
 	if pkcs == PKCS1 {
 		keyHeader = "-----BEGIN RSA PUBLIC KEY-----\n"
@@ -118,6 +171,10 @@ func FormatPublicKey(pkcs keyFormat, publicKey []byte) []byte {
 
 // FormatPrivateKey formats private key, adds header, tail and newline character
 func FormatPrivateKey(pkcs keyFormat, privateKey []byte) []byte {
+	if bytes.HasPrefix(privateKey, []byte("-----BEGIN")) {
+		return privateKey
+	}
+
 	keyHeader, keyTail := "", ""
 	if pkcs == PKCS1 {
 		keyHeader = "-----BEGIN RSA PRIVATE KEY-----\n"
