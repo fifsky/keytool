@@ -34,12 +34,12 @@ Format public key
 ktool format -f=./testdata/no_format_public_key.txt -m=public -t=pkcs1
 ```
 
-Convert public key to pkcs1
+Convert private key to pkcs1, suppert pem and der
 ```bash
 ktool convert -f=./testdata/pkcs8.pem -t=pkcs1
 ```
 
-Convert public key to pkcs8
+Convert private key to pkcs8, suppert pem and der
 ```bash
 ktool convert -f=./testdata/pkcs1.pem -t=pkcs8
 ```
@@ -48,4 +48,9 @@ Show private key format:
 ```bash
 ktool info -f=./testdata/pkcs1.pem
 // Output: file ./testdata/pkcs1.pem format is: PKCS1
+```
+
+public key pkcs8 to pkcs1
+```bash
+openssl rsa -pubin -in public_key_pkcs1.pem -RSAPublicKey_out
 ```

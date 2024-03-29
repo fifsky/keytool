@@ -94,3 +94,27 @@ func TestPKCS12PKCS8(t *testing.T) {
 		t.Fatal("convert error")
 	}
 }
+
+func Test_isPublicKey(t *testing.T) {
+	t.Run("format key", func(t *testing.T) {
+		publicKey, err := os.ReadFile("testdata/public_key.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !isPublicKey(publicKey) {
+			t.Fatal("public key error")
+		}
+	})
+
+	t.Run("no format key", func(t *testing.T) {
+		publicKey, err := os.ReadFile("testdata/no_format_public_key.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !isPublicKey(publicKey) {
+			t.Fatal("public key error")
+		}
+	})
+}

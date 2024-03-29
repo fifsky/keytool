@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -24,6 +25,27 @@ func ParseCertificate(b []byte) (*x509.Certificate, error) {
 	return csr, nil
 }
 
+func getDerKey(key []byte) ([]byte, error) {
+	var (
+		derByte []byte
+		err     error
+	)
+	if !bytes.HasPrefix(key, []byte("-----BEGIN")) {
+		// Base64解码
+		derByte, err = base64.StdEncoding.DecodeString(string(key))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		block, _ := pem.Decode(key)
+		if block == nil {
+			return nil, errors.New("failed to decode PEM block containing key")
+		}
+		derByte = block.Bytes
+	}
+	return derByte, nil
+}
+
 // GetCertSerialNumber 从证书中获取证书序列号
 // openssl x509 -in cert.pem -text -noout -serial
 func GetCertSerialNumber(certificate *x509.Certificate) string {
@@ -32,12 +54,12 @@ func GetCertSerialNumber(certificate *x509.Certificate) string {
 
 // PKCS82PKCS1 converts a PKCS8 key to PKCS1
 func PKCS82PKCS1(pkcs8Key []byte) ([]byte, error) {
-	block, _ := pem.Decode(pkcs8Key)
-	if block == nil {
-		return nil, errors.New("failed to decode PEM block containing PKCS8 key")
+	derKey, err := getDerKey(pkcs8Key)
+	if err != nil {
+		return nil, err
 	}
 
-	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	key, err := x509.ParsePKCS8PrivateKey(derKey)
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +78,12 @@ func PKCS82PKCS1(pkcs8Key []byte) ([]byte, error) {
 
 // PKCS12PKCS8 converts a PKCS1 key to PKCS8
 func PKCS12PKCS8(pkcs1Key []byte) ([]byte, error) {
-	block, _ := pem.Decode(pkcs1Key)
-	if block == nil {
-		return nil, errors.New("failed to decode PEM block containing PKCS1 key")
+	derKey, err := getDerKey(pkcs1Key)
+	if err != nil {
+		return nil, err
 	}
 
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	key, err := x509.ParsePKCS1PrivateKey(derKey)
 	if err != nil {
 		return nil, err
 	}
@@ -102,48 +124,67 @@ func stringSplit(s string, n int) string {
 }
 
 func getPrivateKeyFormat(key []byte) keyFormat {
-	if isPKCS1(key) {
+	if isPrivatePKCS1(key) {
 		return PKCS1
 	}
-	if isPKCS8(key) {
+	if isPrivatePKCS8(key) {
 		return PKCS8
 	}
 	return "unknown"
 }
 
 func isPublicKey(key []byte) bool {
-	block, _ := pem.Decode(key)
-	if block == nil {
+	derKey, err := getDerKey(key)
+	if err != nil {
+		return false
+	}
+	// 解析DER格式的public key
+	_, err = x509.ParsePKIXPublicKey(derKey)
+	if err != nil {
+		// log.Println(err)
+		return false
+	}
+	return true
+}
+
+func getPublicKeyFormat(key []byte) keyFormat {
+	derByte, err := getDerKey(key)
+	if err != nil {
+		panic(err)
+	}
+	_, err = x509.ParsePKCS1PublicKey(derByte)
+	if err == nil {
+		return PKCS1
+	}
+
+	_, err = x509.ParsePKIXPublicKey(derByte)
+	if err == nil {
+		return PKCS8
+	}
+
+	panic(errors.New("unknown public key format"))
+}
+
+func isPrivatePKCS1(pkcs1Key []byte) bool {
+	derKey, err := getDerKey(pkcs1Key)
+	if err != nil {
 		return false
 	}
 
-	_, err := x509.ParsePKCS1PublicKey(block.Bytes)
+	_, err = x509.ParsePKCS1PrivateKey(derKey)
 	if err != nil {
 		return false
 	}
 	return true
 }
 
-func isPKCS1(pkcs1Key []byte) bool {
-	block, _ := pem.Decode(pkcs1Key)
-	if block == nil {
-		return false
-	}
-
-	_, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+func isPrivatePKCS8(pkcs8Key []byte) bool {
+	derKey, err := getDerKey(pkcs8Key)
 	if err != nil {
 		return false
 	}
-	return true
-}
 
-func isPKCS8(pkcs8Key []byte) bool {
-	block, _ := pem.Decode(pkcs8Key)
-	if block == nil {
-		return false
-	}
-
-	_, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	_, err = x509.ParsePKCS8PrivateKey(derKey)
 	if err != nil {
 		return false
 	}

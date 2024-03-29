@@ -36,7 +36,7 @@ func main() {
 	switch tool {
 	case "format":
 		if file == "" {
-			fmt.Println("Usage: ktool format -m=public -f=ccc.pem")
+			fmt.Println("Usage: ktool format -f=ccc.pem")
 			os.Exit(1)
 		}
 
@@ -47,7 +47,8 @@ func main() {
 		}
 
 		if isPublicKey(content) {
-			fmt.Println(string(FormatPublicKey(PKCS1, content)))
+			format := getPublicKeyFormat(content)
+			fmt.Println(string(FormatPublicKey(format, content)))
 		} else {
 			format := getPrivateKeyFormat(content)
 			fmt.Println(string(FormatPrivateKey(format, content)))
