@@ -31,8 +31,11 @@ ktool format -f=./testdata/no_format_pkcs1.txt
 
 Format public key
 ```bash
-ktool format -f=./testdata/no_format_public_key.txt -m=public -t=pkcs1
+ktool format -f=./testdata/no_format_public_key.txt
 ```
+
+
+> format automatically adds the key preamble
 
 Convert private key to pkcs1, suppert pem and der
 ```bash
