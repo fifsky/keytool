@@ -228,3 +228,9 @@ func FormatPrivateKey(pkcs keyFormat, privateKey []byte) []byte {
 	keyBody := stringSplit(strings.Replace(string(privateKey), "\n", "", -1), 64)
 	return []byte(keyHeader + keyBody + keyTail)
 }
+
+// NoFormat change to no format key
+func NoFormat(privateKey []byte) string {
+	block, _ := pem.Decode(privateKey)
+	return base64.StdEncoding.EncodeToString(block.Bytes)
+}

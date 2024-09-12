@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -152,4 +154,21 @@ func Test_getPublicKeyFormat(t *testing.T) {
 			t.Fatal("public is not pkcs8")
 		}
 	})
+}
+
+func Test_NoFormat(t *testing.T) {
+	key, err := os.ReadFile("testdata/pkcs8.pem")
+	if err != nil {
+		t.Fatal(err)
+	}
+	noFormatKey, err := os.ReadFile("testdata/no_format_pkcs8.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	key2 := NoFormat(key)
+	if key2 != strings.TrimSpace(string(noFormatKey)) {
+		fmt.Println(key2)
+		t.Fatal("format error")
+	}
 }

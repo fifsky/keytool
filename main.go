@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 || !slices.Contains([]string{"format", "serial", "convert", "info"}, os.Args[1]) {
+	if len(os.Args) < 2 || !slices.Contains([]string{"format", "serial", "convert", "info", "noformat"}, os.Args[1]) {
 		fmt.Println("Usage: ktool <tool> [options]")
-		fmt.Println("Tools: format, serial, convert")
+		fmt.Println("Tools: format, serial, convert, info, noformat")
 		os.Exit(1)
 	}
 
@@ -53,7 +53,18 @@ func main() {
 			format := getPrivateKeyFormat(content)
 			fmt.Println(string(FormatPrivateKey(format, content)))
 		}
+	case "noformat":
+		if file == "" {
+			fmt.Println("Usage: ktool noformat -f=ccc.pem")
+			os.Exit(1)
+		}
 
+		content, err := os.ReadFile(file)
+		if err != nil {
+			fmt.Printf("read file err: %s\n", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(NoFormat(content))
 	case "serial":
 		if file == "" {
 			fmt.Println("Usage: ktool serial -f=cert.pem")
@@ -113,6 +124,8 @@ func main() {
 		}
 		ret := getPrivateKeyFormat(content)
 		fmt.Printf("file %s format is: %s\n", file, ret)
+	default:
+		fmt.Println("View help command: ktool help")
 	}
 
 }
